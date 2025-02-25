@@ -69,6 +69,13 @@ public class DnsOverHttps implements Dns {
     private final boolean resolvePrivateAddresses;
     private final boolean resolvePublicAddresses;
 
+    private static final PublicSuffixDatabase publicSuffixDatabase;
+
+    static {
+        // 初始化 PublicSuffixDatabase
+        publicSuffixDatabase = new PublicSuffixDatabase();
+    }
+
     DnsOverHttps(Builder builder) {
         if (builder.client == null) {
             throw new NullPointerException("client not set");
@@ -257,7 +264,7 @@ public class DnsOverHttps implements Dns {
         unknownHostException.initCause(failure);
 
         for (int i = 1; i < failures.size(); i++) {
-            Util.addSuppressedIfPossible(unknownHostException, failures.get(i));
+            unknownHostException.addSuppressed(failures.get(i)); // 使用标准库方法
         }
 
         throw unknownHostException;
@@ -285,7 +292,7 @@ public class DnsOverHttps implements Dns {
 
     private List<InetAddress> readResponse(String hostname, Response response) throws Exception {
         if (response.cacheResponse() == null && response.protocol() != Protocol.HTTP_2) {
-            Platform.get().log(Platform.WARN, "Incorrect protocol: " + response.protocol(), null);
+            Platform.get().log("Incorrect protocol: " + response.protocol(), Platform.WARN, new Throwable("Incorrect protocol: " + response.protocol()));
         }
 
         try {
@@ -329,7 +336,7 @@ public class DnsOverHttps implements Dns {
     }
 
     static boolean isPrivateHost(String host) {
-        return PublicSuffixDatabase.get().getEffectiveTldPlusOne(host) == null;
+        return publicSuffixDatabase.getEffectiveTldPlusOne(host) == null;
     }
 
     public static final class Builder {

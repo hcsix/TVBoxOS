@@ -82,16 +82,25 @@ public class JarLoader {
         return success;
     }
 
+
     private DexClassLoader loadJarInternal(String jar, String md5, String key) {
-        if (classLoaders.contains(key))
+        if (classLoaders.containsKey(key))
             return classLoaders.get(key);
-        File cache = new File(App.getInstance().getFilesDir().getAbsolutePath() + "/" + key + ".jar");
+
+        // 使用缓存目录
+        File cacheDir = new File(App.getInstance().getCacheDir().getAbsolutePath() + "/catvod_csp");
+        if (!cacheDir.exists())
+            cacheDir.mkdirs();
+
+        File cache = new File(cacheDir, key + ".jar");
+
         if (!md5.isEmpty()) {
             if (cache.exists() && MD5.getFileMd5(cache).equalsIgnoreCase(md5)) {
                 loadClassLoader(cache.getAbsolutePath(), key);
                 return classLoaders.get(key);
             }
         }
+
         try {
             Response response = OkGo.<File>get(jar).execute();
             InputStream is = response.body().byteStream();
@@ -117,6 +126,7 @@ public class JarLoader {
         }
         return null;
     }
+
 
     public Spider getSpider(String key, String cls, String ext, String jar) {
         String clsKey = cls.replace("csp_", "");
@@ -145,9 +155,6 @@ public class JarLoader {
         try {
             Spider sp = (Spider) classLoader.loadClass("com.github.catvod.spider." + clsKey).newInstance();
             sp.init(App.getInstance(), ext);
-//            if (!jar.isEmpty()) {
-//                sp.homeContent(false); // 增加此行 应该可以解决部分写的有问题源的历史记录问题 但会增加这个源的首次加载时间 不需要可以已删掉
-//            }
             spiders.put(key, sp);
             return sp;
         } catch (Throwable th) {
@@ -155,6 +162,7 @@ public class JarLoader {
         }
         return new SpiderNull();
     }
+
 
     public JSONObject jsonExt(String key, LinkedHashMap<String, String> jxs, String url) {
         try {
@@ -184,6 +192,7 @@ public class JarLoader {
         return null;
     }
 
+
     public Object[] proxyInvoke(Map params) {
         try {
             Method proxyFun = proxyMethods.get(recentJarKey);
@@ -195,4 +204,5 @@ public class JarLoader {
         }
         return null;
     }
+
 }

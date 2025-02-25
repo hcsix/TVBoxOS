@@ -42,8 +42,8 @@ import okhttp3.Cache;
 import okhttp3.Dns;
 import okhttp3.HttpUrl;
 import okhttp3.OkHttpClient;
+import okhttp3.Request;
 import okhttp3.dnsoverhttps.DnsOverHttps;
-import okhttp3.internal.Version;
 import xyz.doikki.videoplayer.exo.ExoMediaSourceHelper;
 
 
@@ -303,7 +303,14 @@ public class OkGoHelper {
             th.printStackTrace();
         }
 
-        HttpHeaders.setUserAgent(Version.userAgent());
+//        HttpHeaders.setUserAgent(Version.userAgent());
+        builder.addInterceptor(chain -> {
+            Request original = chain.request();
+            Request request = original.newBuilder()
+                    .header("User-Agent", "tvbox/1.0") // 替换为你的 User-Agent
+                    .build();
+            return chain.proceed(request);
+        });
 
         OkHttpClient okHttpClient = builder.build();
         OkGo.getInstance().setOkHttpClient(okHttpClient);
