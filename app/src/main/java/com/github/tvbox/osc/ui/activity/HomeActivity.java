@@ -92,11 +92,11 @@ public class HomeActivity extends BaseActivity {
         @SuppressLint({"DefaultLocale", "SetTextI18n"})
         @Override
         public void run() {
-            Date date = new Date();
-            @SuppressLint("SimpleDateFormat")
-            SimpleDateFormat timeFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm");
-            tvDate.setText(timeFormat.format(date));
-            mHandler.postDelayed(this, 1000);
+//            Date date = new Date();
+//            @SuppressLint("SimpleDateFormat")
+//            SimpleDateFormat timeFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm");
+//            tvDate.setText(timeFormat.format(date));
+//            mHandler.postDelayed(this, 1000);
         }
     };
 
